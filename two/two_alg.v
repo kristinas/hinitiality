@@ -57,7 +57,7 @@ apply path_prod.
 
 simpl.
 rewrite transport_paths_FlFr.
-rewrite ap_appl_l.
+rewrite ap_apply_l.
 rewrite ap10_path_arrow.
 rewrite ap_const.
 rewrite (fst c.2).
@@ -66,7 +66,7 @@ hott_simpl.
 
 simpl.
 rewrite transport_paths_FlFr.
-rewrite ap_appl_l.
+rewrite ap_apply_l.
 rewrite ap10_path_arrow.
 rewrite ap_const.
 rewrite (snd c.2).

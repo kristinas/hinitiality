@@ -56,14 +56,14 @@ intro c.
 apply path_sigma_uncurried.
 split with (path_arrow _ _ c.1).
 apply H; intro x.
-rewrite transport_forall'.
+rewrite transport_forall_constant.
 apply H; intro f.
-rewrite transport_forall'.
+rewrite transport_forall_constant.
 rewrite transport_paths_FlFr.
-rewrite ap_appl_l.
+rewrite ap_apply_l.
 rewrite ap10_path_arrow.
-rewrite ap_appl_Fr.
-rewrite ap_lamb.
+rewrite ap_apply_Fr.
+rewrite ap_lambda.
 rewrite (c.2 x f).
 rewrite inv_pV.
 rewrite inv_pp.
@@ -73,7 +73,7 @@ apply whiskerL.
 rewrite inverse_ap.
 repeat apply ap.
 apply H; intro.
-rewrite ap_appl_l.
+rewrite ap_apply_l.
 rewrite ap10_path_arrow.
 reflexivity.
 Defined.
