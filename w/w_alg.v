@@ -52,9 +52,11 @@ Defined.
 Theorem wCell2Path (A : Type) (B : A -> Type) (X Y : WAlg A B) (h_1 h_2 : WHom A B X Y) :
   WCell A B X Y h_1 h_2 -> h_1 = h_2.
 Proof.
-intro c.
+intro c. destruct c as [a t].
+destruct h_1 as [g p].
+destruct h_2 as [h q].
 apply path_sigma_uncurried.
-split with (path_arrow _ _ c.1).
+split with (path_arrow _ _ a).
 apply H; intro x.
 rewrite transport_forall_constant.
 apply H; intro f.
@@ -64,7 +66,7 @@ rewrite ap_apply_l.
 rewrite ap10_path_arrow.
 rewrite ap_apply_Fr.
 rewrite ap_lambda.
-rewrite (c.2 x f).
+rewrite (t x f).
 rewrite inv_pV.
 rewrite inv_pp.
 hott_simpl.

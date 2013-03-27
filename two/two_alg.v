@@ -49,28 +49,21 @@ Defined.
 Theorem twoCell2Path (X Y : TwoAlg) (h_1 h_2 : TwoHom X Y) :
   TwoCell X Y h_1 h_2 -> h_1 = h_2.
 Proof.
-intro c.
+intro c; destruct c as [a [t_0 t_1]].
+destruct h_1 as [f [p_0 p_1]].
+destruct h_2 as [g [q_0 q_1]].
 apply path_sigma_uncurried.
-split with (path_arrow _ _ c.1).
+split with (path_arrow _ _ a).
 rewrite transport_prod.
-apply path_prod.
 
-simpl.
-rewrite transport_paths_FlFr.
-rewrite ap_apply_l.
-rewrite ap10_path_arrow.
-rewrite ap_const.
-rewrite (fst c.2).
+repeat rewrite transport_paths_FlFr.
+repeat rewrite ap_apply_l.
+repeat rewrite ap10_path_arrow.
+repeat rewrite ap_const.
+repeat rewrite t_0.
+repeat rewrite t_1.
 repeat rewrite inv_pV.
-hott_simpl.
-
 simpl.
-rewrite transport_paths_FlFr.
-rewrite ap_apply_l.
-rewrite ap10_path_arrow.
-rewrite ap_const.
-rewrite (snd c.2).
-repeat rewrite inv_pV.
 hott_simpl.
 Defined.
 
