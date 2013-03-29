@@ -29,8 +29,8 @@ Theorem twoDepRules_is_hprop (Two : Type) (zero : Two) (one : Two) :
 Proof.
 apply hprop_allpath.
 intros P Q.
-apply H; intro E.
-apply H; intro e_0.
+apply H; intro E;
+apply H; intro e_0;
 apply H; intro e_1.
 set (X := (Two; (zero, one)) : TwoAlg).
 set (Z := (E; (e_0, e_1)) : TwoAlgFib X).
@@ -38,7 +38,6 @@ apply (twoAlgFibCell_to_AlgFibMapPath X Z).
 apply twoDepElimComp_imp_twoDepUniqCoh.
 assumption.
 Defined.
-
 
 Theorem twoSimpRules_is_hprop (Two : Type) (zero : Two) (one : Two) :
   IsHProp (hasTwoSimpElimCompRules Two zero one *
@@ -48,15 +47,23 @@ apply hprop_allpath.
 intros P Q.
 apply path_prod.
 
-apply H; intro C; apply H; intro c_0; apply H; intro c_1.
+apply H; intro C;
+apply H; intro c_0;
+apply H; intro c_1.
 set (X := (Two; (zero, one)) : TwoAlg).
 set (Y := (C; (c_0, c_1)) : TwoAlg).
 apply (two2Cell_to_HomPath X Y).
 apply (snd P).
 
-apply H; intro C; apply H; intro c_0; apply H; intro c_1;
-apply H; intro g; apply H; intro p_0; apply H; intro p_1;
-apply H; intro h; apply H; intro q_0; apply H; intro q_1.
+apply H; intro C;
+apply H; intro c_0;
+apply H; intro c_1;
+apply H; intro g;
+apply H; intro p_0;
+apply H; intro p_1.
+apply H; intro h;
+apply H; intro q_0;
+apply H; intro q_1.
 set (X := (Two; (zero, one)) : TwoAlg).
 set (Z := (fun x => g x = h x; (p_0 @ q_0^, p_1 @ q_1^)) : TwoAlgFib X).
 apply (twoAlgFibCell_to_AlgFibMapPath X Z).
@@ -64,12 +71,3 @@ apply twoDepElimComp_imp_twoDepUniqCoh.
 apply twoSimpRules_imp_twoDepRules.
 assumption.
 Defined.
-
-
-
-
-
-
-
-
-
