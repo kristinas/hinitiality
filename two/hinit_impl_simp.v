@@ -33,7 +33,7 @@ intros.
 set (Y := (C; (c_0, c_1)) : TwoAlg).
 set (h_1 := (g; (p_0, p_1)) : TwoHom X Y).
 set (h_2 := (h; (q_0, q_1)) : TwoHom X Y).
-apply (twoPath2Cell X Y h_1 h_2). 
+apply (twoHomPath_to_2Cell X Y h_1 h_2). 
 apply @path_contr.
 exact (I Y).
 Defined.

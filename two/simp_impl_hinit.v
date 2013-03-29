@@ -28,7 +28,7 @@ split with (P C c_0 c_1).
 intro y.
 destruct (P C c_0 c_1) as [srec [p_0 p_1]].
 destruct y as [h [q_0 q_1]].
-apply twoCell2Path.
+apply two2Cell_to_HomPath.
 exact (Q C c_0 c_1 srec p_0 p_1 h q_0 q_1).
 Defined.
 
