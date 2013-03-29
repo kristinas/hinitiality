@@ -25,7 +25,8 @@ Context `{Funext}.
 Theorem twoDepRules_is_hprop (Two : Type) (zero : Two) (one : Two) :
   IsHProp (hasTwoDepElimCompRules Two zero one).
 Proof.
-apply (@trunc_forall H); intro E.
+unfold hasTwoDepElimCompRules.
+apply (@trunc_forall H). intro E.
 apply (@trunc_forall H); intro e_0.
 apply (@trunc_forall H); intro e_1.
 apply hprop_allpath.

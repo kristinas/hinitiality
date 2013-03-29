@@ -83,7 +83,7 @@ rewrite transport_prod.
 apply path_prod'.
 
 rewrite transport_paths_FlFr.
-rewrite ap_apply_l.
+rewrite ap_Dapply_l.
 rewrite apD10_path_forall.
 rewrite ap_const.
 rewrite t_0.
@@ -93,7 +93,7 @@ rewrite concat_p1.
 apply concat_pV_p.
 
 rewrite transport_paths_FlFr.
-rewrite ap_apply_l.
+rewrite ap_Dapply_l.
 rewrite apD10_path_forall.
 rewrite ap_const.
 rewrite t_1.
