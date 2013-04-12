@@ -121,14 +121,4 @@ assumption.
 assumption.
 Defined.
 
-Theorem wDep_imp_wSimp (A : Type) (B : A -> Type) : WSimp A B -> WDep A B.
-Proof.
-intro I.
-destruct I as [W [sup P]].
-unfold WDep.
-refine (W; (sup; _)).
-apply wSimpRules_imp_wDepRules.
-assumption.
-Defined.
-
 End AssumeFunext.

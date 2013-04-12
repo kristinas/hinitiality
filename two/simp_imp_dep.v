@@ -113,13 +113,3 @@ apply depRules.
 assumption.
 assumption.
 Defined.
-
-Theorem twoSimp_imp_twoDep : TwoSimp -> TwoDep.
-Proof.
-intro H.
-destruct H as [Two [zero [one P]]].
-unfold TwoDep.
-refine (Two; (zero; (one; _))).
-apply twoSimpRules_imp_twoDepRules.
-assumption.
-Defined.

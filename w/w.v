@@ -29,16 +29,14 @@ Definition hasWDepUniqCohRules (A : Type) (B : A -> Type) (W : Type) (sup : fora
   forall (E : W -> Type) (e : forall x f, (forall b, E (f b)) -> E (sup x f))
   (g : forall w, E w) (p : forall x f, g (sup x f) = e x f (fun b => g (f b)))
   (h : forall w, E w) (q : forall x f, h (sup x f) = e x f (fun b => h (f b))),
-  { alpha : forall (w : W), g w = h w &
-  forall x f,
+  { alpha : forall (w : W), g w = h w & forall x f,
   alpha (sup x f) = p x f @ ap (e x f) (path_forall _ _ (fun b => alpha (f b))) @ (q x f)^ }.
 
 Definition hasWSimpUniqCohRules (A : Type) (B : A -> Type) (W : Type) (sup : forall (x : A), (B x -> W) -> W) : Type :=
   forall (C : Type) (c : forall x, (B x -> C) -> C)
   (g : W -> C) (p : forall x f, g (sup x f) = c x (fun b => g (f b)))
   (h : W -> C) (q : forall x f, h (sup x f) = c x (fun b => h (f b))),
-  { alpha : forall (w : W), g w = h w &
-  forall x f,
+  { alpha : forall (w : W), g w = h w & forall x f,
   alpha (sup x f) = p x f @ ap (c x) (path_arrow _ _ (fun b => alpha (f b))) @ (q x f)^ }.
 
 (***********************************************************************)

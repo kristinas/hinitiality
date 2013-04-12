@@ -53,13 +53,4 @@ apply wDepElimComp_imp_wDepUniqCoh.
 assumption.
 Defined.
 
-Theorem wDep_imp_wSimp (A : Type) (B : A -> Type) : WDep A B -> WSimp A B.
-Proof.
-intro I.
-destruct I as [W [sup P]].
-refine (W; (sup; _)).
-apply wDepRules_imp_wSimpRules.
-assumption.
-Defined.
-
 End AssumeFunext.

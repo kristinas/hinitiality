@@ -1,4 +1,6 @@
-(** Definition of algebras, homomorphisms, 2-cells, and h-initiality for W A B. **)
+(** Definition of algebras, homomorphisms, h-initiality and related
+    concepts for W A B.
+**)
 
 Require Import HoTT.
 
@@ -9,78 +11,140 @@ Local Open Scope equiv_scope.
 Section AssumeFunext.
 Context `{Funext}.
 
-(* Algebras for W A B. *)
+(* Algebras. *)
 Definition WAlg (A : Type) (B : A -> Type) : Type
-  := { C : Type & forall x : A, (B x -> C) -> C }.
+  := { C : Type & forall x, (B x -> C) -> C }.
 
-(* Algebra homomorphisms for W A B. *)
+(* Homomorphisms. *)
 Definition WHom (A : Type) (B : A -> Type) (X Y : WAlg A B) : Type
-  := { h : X.1 -> Y.1 &
-     forall x f, h (X.2 x f) = Y.2 x (fun b => h (f b)) }.
+  := { h : X.1 -> Y.1 & forall x f,
+     h (X.2 x f) = Y.2 x (fun b => h (f b)) }.
 
-(* Algebra 2-cells for W A B. *)
-Definition WCell (A : Type) (B : A -> Type) (X Y : WAlg A B) (h_1 h_2 : WHom A B X Y) : Type
-  := { alpha : h_1.1 == h_2.1 &
-     forall x f,
-     alpha (X.2 x f) = h_1.2 x f @ ap (Y.2 x) (path_arrow _ _ (fun b => alpha (f b))) @ (h_2.2 x f)^ }.
- 
-(* H-initial algebras for W A B. *)
+(* Algebra 2-cells. *)
+Definition W2Cell (A : Type) (B : A -> Type) (X Y : WAlg A B) (i j : WHom A B X Y) : Type
+  := { a : i.1 == j.1 & forall x f,
+     a (X.2 x f) = i.2 x f @ ap (Y.2 x) (path_arrow _ _ (fun b => a (f b))) @ (j.2 x f)^ }.
+
+(* Algebra fibrations, also known as 'dependent algebras'. *)
+Definition WAlgFib (A : Type) (B : A -> Type) (X : WAlg A B) : Type
+  := { E : X.1 -> Type & forall x f, (forall b, E (f b)) -> E (X.2 x f) }.
+
+(* Algebra fibration maps, also known as 'dependent homomorphisms'. *)
+Definition WAlgFibMap (A : Type) (B : A -> Type) (X : WAlg A B) (Z : WAlgFib A B X) : Type
+  := { h : forall w, Z.1 w & forall x f,
+     h (X.2 x f) = Z.2 x f (fun b => h (f b)) }.
+
+(* Algebra fibration cells, a special kind of fibration maps. *)
+Definition WAlgFibCell (A : Type) (B : A -> Type) (X : WAlg A B) (Z : WAlgFib A B X) (k l : WAlgFibMap A B X Z) : Type
+  := WAlgFibMap A B X (existT (fun E => forall x f, (forall b, E (f b)) -> E (X.2 x f))
+       (fun w => k.1 w = l.1 w)
+       (fun x f hyp => k.2 x f @ ap (Z.2 x f) (path_forall _ _ hyp) @ (l.2 x f)^)).
+
+(* Identity homomorphism. *)
+Definition wIdHom (A : Type) (B : A -> Type) (X : WAlg A B) : WHom A B X X
+  := existT (fun h => forall x f, h (X.2 x f) = X.2 x (fun b => h (f b)))
+       idmap (fun x f => 1).
+
+(* Composition of homomorphisms. *)
+Definition wCompHom (A : Type) (B : A -> Type) (X Y Z : WAlg A B) :
+  WHom A B X Y -> WHom A B Y Z -> WHom A B X Z
+  := fun i j => existT (fun h => forall x f, h (X.2 x f) = Z.2 x (fun b => h (f b)))
+       (j.1 o i.1) (fun x f => ap j.1 (i.2 x f) @ j.2 x (i.1 o f)).
+
+(* Isomorphism of algebras - we use the 'bi-invertibility' version. *)
+Definition WAlgIso (A : Type) (B : A -> Type) (X Y : WAlg A B) : Type
+  := { i : WHom A B X Y &
+     { j : WHom A B Y X &
+     { k : WHom A B Y X &
+     (wCompHom A B X Y X i j = wIdHom A B X) *
+     (wCompHom A B Y X Y k i = wIdHom A B Y) }}}.
+
+(* H-initiality of algebras. *)
 Definition wHinit (A : Type) (B : A -> Type) (X : WAlg A B) : Type
   := forall (Y : WAlg A B), Contr (WHom A B X Y).
 
 (***********************************************************************)
 (***********************************************************************)
 
-(** We show that for any homomorphisms h_1, h_2 from X to Y we have
-      h_1 = h_2 <-> WCell A B X Y h_1 h_2
-
-    The above logical equality can in fact be strengthened to an
-    equivalence; however, the HoTT library does not yet have the tools
-    to prove this in an elegant way.
-**)
-Theorem wPath2Cell (A : Type) (B : A -> Type) (X Y : WAlg A B) (h_1 h_2 : WHom A B X Y) :
-  h_1 = h_2 -> WCell A B X Y h_1 h_2.
+(* H-initiality is an h-proposition. *)
+Theorem wHinit_is_hprop (A : Type) (B : A -> Type) (X : WAlg A B) :
+  IsHProp (wHinit A B X).
 Proof.
-intro p.
-induction p.
-split with (fun x => 1).
-intros.
-rewrite path_arrow_1.
-hott_simpl.
+  apply trunc_forall.
 Defined.
 
-Theorem wCell2Path (A : Type) (B : A -> Type) (X Y : WAlg A B) (h_1 h_2 : WHom A B X Y) :
-  WCell A B X Y h_1 h_2 -> h_1 = h_2.
+(* All h-initial algebras are isomorphic. *)
+Theorem wHinit_alg_are_iso (A : Type) (B : A -> Type) (X Y : WAlg A B) :
+  wHinit A B X -> wHinit A B Y -> WAlgIso A B X Y.
 Proof.
-intro c. destruct c as [a t].
-destruct h_1 as [g p].
-destruct h_2 as [h q].
-apply path_sigma_uncurried.
-split with (path_arrow _ _ a).
-apply H; intro x.
-rewrite transport_forall_constant.
-apply H; intro f.
-rewrite transport_forall_constant.
-rewrite transport_paths_FlFr.
-rewrite ap_apply_l.
-rewrite ap10_path_arrow.
-rewrite ap_apply_Fr.
-rewrite ap_lambda.
-rewrite (t x f).
-rewrite inv_pV.
-rewrite inv_pp.
-hott_simpl.
-apply moveR_pM.
-apply whiskerL.
-rewrite inverse_ap.
-repeat apply ap.
-apply H; intro.
-rewrite ap_apply_l.
-rewrite ap10_path_arrow.
-reflexivity.
+  intros P Q.
+  set (i := @center _ (P Y)).
+  set (j := @center _ (Q X)).
+  refine (i; (j; (j; (_, _)))).
+  apply @path_contr; exact (P X).
+  apply @path_contr; exact (Q Y).
+Defined.
+
+(** Auxiliary lemmas handling quantification over algebras and homomorphisms. *)
+
+Lemma w_alg_quant_forall (A : Type) (B : A -> Type) (P : WAlg A B -> Type) (Q : forall C c, Type) :
+  (forall C c, P (C; c) <~> Q C c) ->
+  (forall (Y : WAlg A B), P Y) <~> (forall C c, Q C c).
+Proof.
+  intro K.
+
+  apply transitivity with (y := forall C c, P (C; c)).
+  apply symmetry; refine (equiv_sigT_rect _).
+
+  refine (equiv_functor_forall_id _); intro C.
+  refine (equiv_functor_forall_id _); intro c.
+
+  apply K. 
+Defined.
+
+Lemma w_alg_quant_sigma (A : Type) (B : A -> Type) (P : WAlg A B -> Type) (Q : forall C c, Type) :
+  (forall C c, P (C; c) <~> Q C c) ->
+  { Y : WAlg A B & P Y } <~> { C : _ & { c : _ & Q C c }}.
+Proof.
+  intro K.
+
+  apply transitivity with (y := { C : _ & { c : _ & P (C; c) }}).
+  apply symmetry; apply equiv_sigma_assoc.
+
+  refine (equiv_functor_sigma_id _); intro C.
+  refine (equiv_functor_sigma_id _); intro c.
+
+  apply K. 
+Defined.
+
+Lemma w_hom_quant_forall (A : Type) (B : A -> Type) (X Y : WAlg A B) (P : WHom A B X Y -> Type) (Q : forall f p, Type) :
+  (forall f p, P (f; p) <~> Q f p) ->
+  (forall (h : WHom A B X Y), P h) <~> (forall f p, Q f p).
+Proof.
+  intro K.
+
+  apply transitivity with (y := forall f p, P (f; p)).
+  apply symmetry; apply equiv_sigT_rect.
+
+  apply equiv_functor_forall_id; intro f.
+  apply equiv_functor_forall_id; intro p.
+
+  apply K.
+Defined.
+
+Lemma w_hom_quant_sigma (A : Type) (B : A -> Type) (X Y : WAlg A B) (P : WHom A B X Y -> Type) (Q : forall f p, Type) :
+  (forall f p, P (f; p) <~> Q f p) ->
+  { h : WHom A B X Y & P h } <~> { f : _ & { p : _ & Q f p }}.
+Proof.
+  intro K.
+
+  apply transitivity with (y := { f : _ & { p : _ & P (f; p) }}).
+  apply symmetry; apply equiv_sigma_assoc.
+
+  apply equiv_functor_sigma_id; intro f.
+  apply equiv_functor_sigma_id; intro p.
+
+  apply K.
 Defined.
 
 End AssumeFunext.
-
-(***********************************************************************)
-(***********************************************************************)
