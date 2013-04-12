@@ -1,4 +1,4 @@
-(** We give three different definitions of the type W A B:
+(** Wrules for W-types imply the 
 
       1) Using dependent elimination and computation rules.
       2) Using simple elimination and computation rules, together with
@@ -17,7 +17,7 @@ Context `{Funext}.
 
 Definition hasWDepElimCompRules (A: Type) (B : A -> Type) (W : Type) (sup : forall (x : A), (B x -> W) -> W) : Type :=
   forall (E : W -> Type) (e : forall x f, (forall b, E (f b)) -> E (sup x f)),
-  { drec : forall (x : W), E x &
+  { drec : forall (w : W), E w &
   forall x f, drec (sup x f)  = e x f (fun b => drec (f b)) }.
 
 Definition hasWSimpElimCompRules (A : Type) (B : A -> Type) (W : Type) (sup : forall (x : A), (B x -> W) -> W) : Type :=

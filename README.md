@@ -9,7 +9,7 @@ The organization is as follows.
 
 ------------------------------------------------------------------------------
 
-Folder "two"
+Folder "two-hinit"
 
 Contains the characterization of the type Two as a homotopy-initial
 algebra. More precisely, we give 3 different characterizations of Two and show that
@@ -36,7 +36,7 @@ The files are organized as follows:
 
 ------------------------------------------------------------------------------
 
-Folder "w"
+Folder "w-hinit"
 
 Contains the characterization of the W-type of well-founded trees W A B as a
 homotopy-initial algebra. More precisely, we give 3 different characterizations

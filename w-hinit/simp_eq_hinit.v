@@ -42,12 +42,11 @@ Definition U_2 := forall Y, WHom A B X Y *
 
 Theorem u_1_eq_u_2 : U_1 <~> U_2.
 Proof.
-  admit. (*
   apply equiv_functor_forall_id; intro Y.
   apply equiv_functor_prod_l. 
   apply equiv_functor_forall_id; intro i.
   apply equiv_functor_forall_id; intro j.
-  apply wHomPath_eq_2Cell. *)
+  apply wHomPath_eq_2Cell.
 Defined.
 
 Definition U_3 := (forall Y, WHom A B X Y) *
