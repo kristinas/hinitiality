@@ -17,6 +17,7 @@ Local Open Scope equiv_scope.
 
 Section AssumeFunext.
 Context `{Funext}.
+Context `{Funext}.
 
 Theorem wDepRules_is_hprop (A : Type) (B : A -> Type) (W : Type) (sup : forall x, (B x -> W) -> W) :
   IsHProp (hasWDepElimCompRules A B W sup).
@@ -29,7 +30,7 @@ Proof.
   set (X := (W; sup) : WAlg A B).
   set (Z := (E; e) : WAlgFib A B X).
 
-  apply @wAlgFibCell_to_algFibMapPath with (H := H) (Z := Z).
+  apply @wAlgFibCell_to_algFibMapPath with (H := H0) (Z := Z).
   apply wDepElimComp_imp_wDepUniqCoh. 
   assumption.
 Defined.
