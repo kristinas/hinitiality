@@ -15,7 +15,6 @@ Local Open Scope equiv_scope.
 Section AssumeFunext.
 Context `{Funext}.
 Context `{Funext}.
-Context `{Funext}.
 
 Section SimpEqHinit.
 
@@ -35,7 +34,7 @@ Definition U_1 := forall Y, WHom A B X Y * forall (i j : WHom A B X Y), i = j.
 Theorem u_0_eq_u_1 : U_0 <~> U_1.
 Proof.
   apply (@equiv_functor_forall_id H); intro Y.
-  apply equiv_contr_inhabited_allpath.
+  apply (@equiv_contr_inhabited_allpath H).
 Defined.
 
 Definition U_2 := forall Y, WHom A B X Y *
@@ -47,7 +46,7 @@ Proof.
   apply equiv_functor_prod_l.
   apply (@equiv_functor_forall_id H); intro i.
   apply (@equiv_functor_forall_id H); intro j.
-  apply (@wHomPath_eq_2Cell H1).
+  apply (@wHomPath_eq_2Cell H0).
 Defined.
 
 Definition U_3 := (forall Y, WHom A B X Y) *
@@ -65,11 +64,11 @@ Definition U_4 := (forall C c, WHom A B X (C; c)) *
 Theorem u_3_eq_u_4 : U_3 <~> U_4.
 Proof.
   apply equiv_functor_prod'.
-  apply (@w_alg_quant_forall H0); intros.
+  apply (@w_alg_quant_forall H); intros.
   apply equiv_idmap.
-  apply (@w_alg_quant_forall H0); intros.
-  apply (@w_hom_quant_forall H0); intros.
-  apply (@w_hom_quant_forall H0); intros.
+  apply (@w_alg_quant_forall H); intros.
+  apply (@w_hom_quant_forall H); intros.
+  apply (@w_hom_quant_forall H); intros.
   apply equiv_idmap.
 Defined.
 
