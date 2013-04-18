@@ -96,8 +96,8 @@ Proof.
   apply transitivity with (y := forall C c, P (C; c)).
   apply symmetry; refine (equiv_sigT_rect _).
 
-  refine (equiv_functor_forall_id _); intro C.
-  refine (equiv_functor_forall_id _); intro c.
+  apply (@equiv_functor_forall_id H); intro C.
+  apply (@equiv_functor_forall_id H); intro c.
 
   apply K. 
 Defined.
@@ -111,10 +111,10 @@ Proof.
   apply transitivity with (y := { C : _ & { c : _ & P (C; c) }}).
   apply symmetry; apply equiv_sigma_assoc.
 
-  refine (equiv_functor_sigma_id _); intro C.
-  refine (equiv_functor_sigma_id _); intro c.
+  apply equiv_functor_sigma_id; intro C.
+  apply equiv_functor_sigma_id; intro c.
 
-  apply K. 
+  apply K.
 Defined.
 
 Lemma w_hom_quant_forall (A : Type) (B : A -> Type) (X Y : WAlg A B) (P : WHom A B X Y -> Type) (Q : forall f p, Type) :
@@ -126,8 +126,8 @@ Proof.
   apply transitivity with (y := forall f p, P (f; p)).
   apply symmetry; apply equiv_sigT_rect.
 
-  apply equiv_functor_forall_id; intro f.
-  apply equiv_functor_forall_id; intro p.
+  apply (@equiv_functor_forall_id H); intro f.
+  apply (@equiv_functor_forall_id H); intro p.
 
   apply K.
 Defined.

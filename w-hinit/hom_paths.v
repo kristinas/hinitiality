@@ -84,8 +84,8 @@ Definition U_4 := { a : g = h & forall x f,
 Lemma u_3_eq_u_4 : U_3 <~> U_4.
 Proof.
   apply equiv_functor_sigma_id; intros.
-  refine (equiv_functor_forall_id _); intro x.
-  refine (equiv_functor_forall_id _); intro f.
+  apply (@equiv_functor_forall_id H); intro x.
+  apply (@equiv_functor_forall_id H); intro f.
 
   apply equiv_concat_l; symmetry.
   unfold Q. rewrite transport_paths_FlFr.
@@ -98,8 +98,8 @@ Definition U_5 := { a : g = h & forall x f,
 Lemma u_4_eq_u_5 : U_4 <~> U_5.
 Proof.
   apply equiv_functor_sigma_id; intros.
-  refine (equiv_functor_forall_id _); intro x.
-  refine (equiv_functor_forall_id _); intro f.
+  apply (@equiv_functor_forall_id H); intro x.
+  apply (@equiv_functor_forall_id H); intro f.
 
   set (Y_0 := (ap (M x f) a)^ @ (p x f @ ap (N x f) a) = q x f).
   set (Y_1 := p x f @ ap (N x f) a = ap (M x f) a @ q x f).
@@ -123,9 +123,9 @@ Definition U_6 := { a : g = h & forall x f, apD10 a (c x f) =
 Lemma u_5_eq_u_6 : U_5 <~> U_6.
 Proof.
   apply equiv_functor_sigma_id; intros.
-  refine (equiv_functor_forall_id _); intro x.
-  refine (equiv_functor_forall_id _); intro f.
-  
+  apply (@equiv_functor_forall_id H); intro x.
+  apply (@equiv_functor_forall_id H); intro f.
+
   apply equiv_concat_r; apply whiskerR; apply whiskerL.
   unfold N; rewrite ap_apply_Fr; apply ap.
   rewrite ap_lambdaD; apply ap; reflexivity.
@@ -138,8 +138,8 @@ Lemma u_6_eq_u_7 : U_6 <~> U_7.
 Proof.
   apply symmetry.
   apply (equiv_functor_sigma' (equiv_path_forall _ _)); intros.
-  refine (equiv_functor_forall_id _); intro x.
-  refine (equiv_functor_forall_id _); intro f.
+  apply (@equiv_functor_forall_id H); intro x.
+  apply (@equiv_functor_forall_id H); intro f.
 
   apply equiv_concat_lr.
   apply apD10_path_forall.

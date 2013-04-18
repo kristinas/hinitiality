@@ -91,13 +91,13 @@ Proof.
 
   apply transitivity with (y := forall C c, P (C; c)).
   apply symmetry; apply equiv_sigT_rect.
-  refine (equiv_functor_forall_id _); intro C.
+  apply (@equiv_functor_forall_id H); intro C.
 
   apply transitivity with (y := forall c_0 c_1, P (C; (c_0, c_1))).
   apply symmetry; apply (equiv_prod_rect (fun p => P (C; p))).
 
-  apply equiv_functor_forall_id; intro c_0.
-  apply equiv_functor_forall_id; intro c_1.
+  apply (@equiv_functor_forall_id H); intro c_0.
+  apply (@equiv_functor_forall_id H); intro c_1.
 
   apply K. 
 Defined.
@@ -129,13 +129,13 @@ Proof.
 
   apply transitivity with (y := forall f p, P (f; p)).
   apply symmetry; apply equiv_sigT_rect.
-  apply equiv_functor_forall_id; intro f.
+  apply (@equiv_functor_forall_id H); intro f.
 
   apply transitivity with (y := forall p_0 p_1, P (f; (p_0, p_1))).
   apply symmetry; apply (equiv_prod_rect (fun p => P (f; p))).
 
-  apply equiv_functor_forall_id; intro p_0.
-  apply equiv_functor_forall_id; intro p_1.
+  apply (@equiv_functor_forall_id H); intro p_0.
+  apply (@equiv_functor_forall_id H); intro p_1.
 
   apply K.
 Defined.
