@@ -62,7 +62,7 @@ The files are organized as follows:
      equivalent as types.
 
 
-Repository last updated: April 12, 2013
+Repository last updated: April 18, 2013
 Authors: Steve Awodey, Nicola Gambino, Kristina Sojakova
 Contact : awodey@cmu.edu
           nicola.gambino@gmail.com
