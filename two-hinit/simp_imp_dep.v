@@ -29,24 +29,24 @@ Variable e_1 : E one.
 
 (***********************************************************************)
 (***********************************************************************)
-
-(* To obtain dep elim, we use simple elim with the type below. *)
-Definition C : Type := { x : Two & E x }.
+(* 
+(* To obtain dep elim, we use simple elim with the type below. *) *)
+Let C : Type := { x : Two & E x }.
 
 (* For this we supply the terms below. *)
-Definition c_0 : C := (zero; e_0).
-Definition c_1 : C := (one; e_1).
+Let c_0 : C := (zero; e_0).
+Let c_1 : C := (one; e_1).
 
 (* This gives us the following functions: *)
-Definition u_1 : Two -> Two := fun x => ((P C c_0 c_1).1 x).1.
-Definition u_2 : forall x, E (u_1 x) := fun x => ((P C c_0 c_1).1 x).2.
+Let u_1 : Two -> Two := fun x => ((P C c_0 c_1).1 x).1.
+Let u_2 : forall x, E (u_1 x) := fun x => ((P C c_0 c_1).1 x).2.
 
 (* By the computation rules for simple elim: *)
-Definition p_0 : u_1 zero = zero := (fst (P C c_0 c_1).2) ..1.
-Definition p_1 : u_1 one = one := (snd (P C c_0 c_1).2) ..1.
+Let p_0 : u_1 zero = zero := (fst (P C c_0 c_1).2) ..1.
+Let p_1 : u_1 one = one := (snd (P C c_0 c_1).2) ..1.
 
-Definition gamma_0 : p_0 # u_2 zero = e_0 := (fst (P C c_0 c_1).2) ..2.
-Definition gamma_1 : p_1 # u_2 one = e_1 := (snd (P C c_0 c_1).2) ..2.
+Let gamma_0 : p_0 # u_2 zero = e_0 := (fst (P C c_0 c_1).2) ..2.
+Let gamma_1 : p_1 # u_2 one = e_1 := (snd (P C c_0 c_1).2) ..2.
 
 (***********************************************************************)
 (***********************************************************************)
@@ -55,44 +55,45 @@ Definition gamma_1 : p_1 # u_2 one = e_1 := (snd (P C c_0 c_1).2) ..2.
    propositionally equal to the identity function on Two. *)
 
 (* By the uniqueness rule for simple elim: *)
-Definition alpha : forall x, u_1 x = x
+Let alpha : forall x, u_1 x = x
   := (Q Two zero one u_1 p_0 p_1 idmap 1 1).1.
 
 (* By the coherence rules for simple elim: *)
-Definition theta_0 : alpha zero = p_0 @ 1^
+Let theta_0 : alpha zero = p_0 @ 1^
   := fst (Q Two zero one u_1 p_0 p_1 idmap 1 1).2.
 
-Definition theta_1 : alpha one = p_1 @ 1^
+Let theta_1 : alpha one = p_1 @ 1^
   := snd (Q Two zero one u_1 p_0 p_1 idmap 1 1).2.
 
 (***********************************************************************)
 (***********************************************************************)
 
 (* Dependent elim. *)
-Definition drec : forall (x : Two), E x := fun x => alpha x # u_2 x.
+Let drec : forall (x : Two), E x := fun x => alpha x # u_2 x.
 
 (* Dependent comp for zero. *)
-Definition beta_0 : drec zero = e_0.
+Let beta_0 : drec zero = e_0.
 Proof.
-unfold drec.
-rewrite theta_0.
-rewrite transport_pp.
-simpl.
-apply gamma_0.
+  unfold drec.
+  rewrite theta_0.
+  rewrite transport_pp.
+  simpl.
+  apply gamma_0.
 Defined.
 
 (* Dependent comp for one *)
-Definition beta_1 : drec one = e_1.
+Let beta_1 : drec one = e_1.
 Proof.
-unfold drec.
-rewrite theta_1.
-rewrite transport_pp.
-simpl.
-apply gamma_1.
+  unfold drec.
+  rewrite theta_1.
+  rewrite transport_pp.
+  simpl.
+  apply gamma_1.
 Defined.
 
 (* Putting this all together: *)
-Definition depRules : { drec : forall (x : Two), E x &
+Definition twoSimpRules_imp_twoDepRules' :
+  { drec : forall (x : Two), E x &
   (drec zero = e_0) * (drec one = e_1) }
   := (drec; (beta_0, beta_1)).
 
@@ -106,10 +107,10 @@ Theorem twoSimpRules_imp_twoDepRules (Two : Type) (zero : Two) (one : Two) :
   hasTwoSimpUniqCohRules Two zero one ->
   hasTwoDepElimCompRules Two zero one.
 Proof.
-intro H.
-destruct H as [P Q].
-unfold hasTwoDepElimCompRules.
-apply depRules.
-assumption.
-assumption.
+  intro H.
+  destruct H as [P Q].
+  unfold hasTwoDepElimCompRules.
+  apply twoSimpRules_imp_twoDepRules'.
+  assumption.
+  assumption.
 Defined.

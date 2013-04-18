@@ -36,8 +36,7 @@ Proof.
 Defined.
 
 Theorem wSimpRules_is_hprop (A : Type) (B : A -> Type) (W : Type) (sup : forall x, (B x -> W) -> W) :
-  IsHProp (hasWSimpElimCompRules A B W sup *
-           @hasWSimpUniqCohRules H A B W sup).
+  IsHProp (hasWSimpElimCompRules A B W sup * @hasWSimpUniqCohRules H A B W sup).
 Proof.
   set (K := @wSimpRules_eq_wHinit H0 H A B W sup).
   apply symmetry in K.

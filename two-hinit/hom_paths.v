@@ -30,28 +30,28 @@ Variable g : forall (x : C), E x.
 Variable q_0 : g c_0 = e_0.
 Variable q_1 : g c_1 = e_1.
 
-Definition X : TwoAlg := (C; (c_0, c_1)).
-Definition Z : TwoAlgFib X := (E; (e_0, e_1)).
-Definition k : TwoAlgFibMap X Z := (f; (p_0, p_1)).
-Definition l : TwoAlgFibMap X Z := (g; (q_0, q_1)).
+Let X : TwoAlg := (C; (c_0, c_1)).
+Let Z : TwoAlgFib X := (E; (e_0, e_1)).
+Let k : TwoAlgFibMap X Z := (f; (p_0, p_1)).
+Let l : TwoAlgFibMap X Z := (g; (q_0, q_1)).
 
 (* We will go through the following chain of equivalent types U_0 ... U_n. *)
-Definition U_0 := k = l.
+Let U_0 := k = l.
 
-Definition P := fun h : forall x, E x => (h c_0 = e_0) * (h c_1 = e_1).
-Definition U_1 := { a : f = g & transport P a (p_0, p_1) = (q_0, q_1) }.
+Let P := fun h : forall x, E x => (h c_0 = e_0) * (h c_1 = e_1).
+Let U_1 := { a : f = g & transport P a (p_0, p_1) = (q_0, q_1) }.
 
-Theorem u_0_eq_u_1 : U_0 <~> U_1.
+Let u_0_eq_u_1 : U_0 <~> U_1.
 Proof.
   apply symmetry.
   apply (equiv_path_sigma P k l).
 Defined.
 
-Definition Q_0 := fun h : forall x, E x => (h c_0 = e_0).
-Definition Q_1 := fun h : forall x, E x => (h c_1 = e_1).
-Definition U_2 := { a : f = g & (transport Q_0 a p_0, transport Q_1 a p_1) = (q_0, q_1) }.
+Let Q_0 := fun h : forall x, E x => (h c_0 = e_0).
+Let Q_1 := fun h : forall x, E x => (h c_1 = e_1).
+Let U_2 := { a : f = g & (transport Q_0 a p_0, transport Q_1 a p_1) = (q_0, q_1) }.
 
-Lemma u_1_eq_u_2 : U_1 <~> U_2.
+Let u_1_eq_u_2 : U_1 <~> U_2.
 Proof.
   apply equiv_functor_sigma_id; intros.
   apply equiv_concat_l.
@@ -59,9 +59,9 @@ Proof.
   apply transport_prod.
 Defined.
 
-Definition U_3 := { a : f = g & (transport Q_0 a p_0 = q_0) * (transport Q_1 a p_1 = q_1) }.
+Let U_3 := { a : f = g & (transport Q_0 a p_0 = q_0) * (transport Q_1 a p_1 = q_1) }.
 
-Lemma u_2_eq_u_3 : U_2 <~> U_3.
+Let u_2_eq_u_3 : U_2 <~> U_3.
 Proof.
   apply equiv_functor_sigma_id; intros.
   set (x := transport Q_0 a p_0).
@@ -70,9 +70,9 @@ Proof.
   apply (equiv_path_prod (x, y) (q_0, q_1)).
 Defined.
 
-Definition U_4 := { a : f = g & ((apD10 a c_0)^ @ p_0 = q_0) * ((apD10 a c_1)^ @ p_1 = q_1) }.
+Let U_4 := { a : f = g & ((apD10 a c_0)^ @ p_0 = q_0) * ((apD10 a c_1)^ @ p_1 = q_1) }.
 
-Lemma u_3_eq_u_4 : U_3 <~> U_4.
+Let u_3_eq_u_4 : U_3 <~> U_4.
 Proof.
   apply equiv_functor_sigma_id; intros.
   apply equiv_functor_prod'.
@@ -86,9 +86,9 @@ Proof.
   reflexivity.
 Defined.
 
-Definition U_5 := { a : f = g & (apD10 a c_0 = p_0 @ q_0^) * (apD10 a c_1 = p_1 @ q_1^) }.
+Let U_5 := { a : f = g & (apD10 a c_0 = p_0 @ q_0^) * (apD10 a c_1 = p_1 @ q_1^) }.
 
-Lemma u_4_eq_u_5 : U_4 <~> U_5.
+Let u_4_eq_u_5 : U_4 <~> U_5.
 Proof.
   apply equiv_functor_sigma_id; intros.
   apply equiv_functor_prod'.
@@ -110,9 +110,9 @@ Proof.
   apply equiv_path_inverse.
 Defined.
 
-Definition U_6 := { a : f == g & (a c_0 = p_0 @ q_0^) * (a c_1 = p_1 @ q_1^) }.
+Let U_6 := { a : f == g & (a c_0 = p_0 @ q_0^) * (a c_1 = p_1 @ q_1^) }.
 
-Lemma u_5_eq_u_6 : U_5 <~> U_6.
+Let u_5_eq_u_6 : U_5 <~> U_6.
 Proof.
   apply symmetry.
   apply (equiv_functor_sigma' (equiv_path_forall _ _)); intros.
@@ -126,7 +126,7 @@ Proof.
 Defined.
 
 (* Putting all this together: *)
-Lemma u_0_eq_u_6 : k = l <~> TwoAlgFibCell X Z k l.
+Theorem twoAlgFibMapPath_eq_algFibCell' : k = l <~> TwoAlgFibCell X Z k l.
   apply transitivity with (y := U_1). apply u_0_eq_u_1.
   apply transitivity with (y := U_2). apply u_1_eq_u_2.
   apply transitivity with (y := U_3). apply u_2_eq_u_3.
@@ -147,7 +147,7 @@ Proof.
   destruct Z as [E [e_0 e_1]].
   destruct k as [f [p_0 p_1]].
   destruct l as [g [q_0 q_1]].
-  apply u_0_eq_u_6.
+  apply twoAlgFibMapPath_eq_algFibCell'.
 Defined.
 
 Definition twoAlgFibMapPath_to_algFibCell (X : TwoAlg) (Z : TwoAlgFib X) (k l : TwoAlgFibMap X Z) :

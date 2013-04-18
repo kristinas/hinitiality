@@ -22,22 +22,22 @@ Variable Two : Type.
 Variable zero : Two.
 Variable one : Two.
 
-Definition X : TwoAlg := (Two; (zero, one)).
+Let X : TwoAlg := (Two; (zero, one)).
 
 (* We will go through the following chain of equivalent types U_0 ... U_n. *)
-Definition U_0 := forall Y, Contr (TwoHom X Y).
-Definition U_1 := forall Y, TwoHom X Y * forall (i j : TwoHom X Y), i = j.
+Let U_0 := forall Y, Contr (TwoHom X Y).
+Let U_1 := forall Y, TwoHom X Y * forall (i j : TwoHom X Y), i = j.
 
-Theorem u_0_eq_u_1 : U_0 <~> U_1.
+Let u_0_eq_u_1 : U_0 <~> U_1.
 Proof.
   apply equiv_functor_forall_id; intro Y.
   apply equiv_contr_inhabited_allpath.
 Defined.
 
-Definition U_2 := forall Y, TwoHom X Y *
+Let U_2 := forall Y, TwoHom X Y *
   forall (i j : TwoHom X Y), Two2Cell X Y i j.
 
-Theorem u_1_eq_u_2 : U_1 <~> U_2.
+Let u_1_eq_u_2 : U_1 <~> U_2.
 Proof.
   apply equiv_functor_forall_id; intro Y.
   apply equiv_functor_prod_l.
@@ -46,20 +46,20 @@ Proof.
   apply twoHomPath_eq_2Cell.
 Defined.
 
-Definition U_3 := (forall Y, TwoHom X Y) *
+Let U_3 := (forall Y, TwoHom X Y) *
   (forall Y, forall (i j : TwoHom X Y), Two2Cell X Y i j).
 
-Theorem u_2_eq_u_3 : U_2 <~> U_3.
+Let u_2_eq_u_3 : U_2 <~> U_3.
 Proof.
   apply symmetry.
   apply equiv_prod_corect.
 Defined.
 
-Definition U_4 := (forall C c_0 c_1, TwoHom X (C; (c_0, c_1))) *
+Let U_4 := (forall C c_0 c_1, TwoHom X (C; (c_0, c_1))) *
   (forall C c_0 c_1, forall f p_0 p_1, forall g q_0 q_1,
   Two2Cell X (C; (c_0, c_1)) (f; (p_0, p_1)) (g; (q_0, q_1))).
 
-Theorem u_3_eq_u_4 : U_3 <~> U_4.
+Let u_3_eq_u_4 : U_3 <~> U_4.
 Proof.
   apply equiv_functor_prod'.
   apply two_alg_quant_forall; intros.

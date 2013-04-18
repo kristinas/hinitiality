@@ -25,22 +25,22 @@ Variable B : A -> Type.
 Variable W : Type.
 Variable sup : forall x, (B x -> W) -> W.
 
-Definition X : WAlg A B := (W; sup).
+Let X : WAlg A B := (W; sup).
 
 (* We will go through the following chain of equivalent types U_0 ... U_n. *)
-Definition U_0 := forall Y, Contr (WHom A B X Y).
-Definition U_1 := forall Y, WHom A B X Y * forall (i j : WHom A B X Y), i = j.
+Let U_0 := forall Y, Contr (WHom A B X Y).
+Let U_1 := forall Y, WHom A B X Y * forall (i j : WHom A B X Y), i = j.
 
-Theorem u_0_eq_u_1 : U_0 <~> U_1.
+Let u_0_eq_u_1 : U_0 <~> U_1.
 Proof.
   apply (@equiv_functor_forall_id H); intro Y.
   apply (@equiv_contr_inhabited_allpath H).
 Defined.
 
-Definition U_2 := forall Y, WHom A B X Y *
+Let U_2 := forall Y, WHom A B X Y *
   forall (i j : WHom A B X Y), W2Cell A B X Y i j.
 
-Theorem u_1_eq_u_2 : U_1 <~> U_2.
+Let u_1_eq_u_2 : U_1 <~> U_2.
 Proof.
   apply (@equiv_functor_forall_id H); intro Y.
   apply equiv_functor_prod_l.
@@ -49,19 +49,19 @@ Proof.
   apply (@wHomPath_eq_2Cell H0).
 Defined.
 
-Definition U_3 := (forall Y, WHom A B X Y) *
+Let U_3 := (forall Y, WHom A B X Y) *
   (forall Y, forall (i j : WHom A B X Y), W2Cell A B X Y i j).
 
-Theorem u_2_eq_u_3 : U_2 <~> U_3.
+Let u_2_eq_u_3 : U_2 <~> U_3.
 Proof.
   apply symmetry.
   apply (@equiv_prod_corect H).
 Defined.
 
-Definition U_4 := (forall C c, WHom A B X (C; c)) *
+Let U_4 := (forall C c, WHom A B X (C; c)) *
   (forall C c, forall f p, forall g q, W2Cell A B X (C; c) (f; p) (g; q)).
 
-Theorem u_3_eq_u_4 : U_3 <~> U_4.
+Let u_3_eq_u_4 : U_3 <~> U_4.
 Proof.
   apply equiv_functor_prod'.
   apply (@w_alg_quant_forall H); intros.
