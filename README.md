@@ -61,8 +61,22 @@ The files are organized as follows:
    - File ""simp_eq_hinit.v" shows that the simple rules and h-initiality are
      equivalent as types.
 
+------------------------------------------------------------------------------
 
-Repository last updated: April 18, 2013
+Folder "nat-from_w"
+
+Contains the encoding of natural numbers as a W-type.
+The files are organized as follows:
+
+   - File "types.v" contains the definitions of the inductive types Zero, One,
+     Two, and W A B.
+   - File "nat.v" contains the encoding of natural numbers as a W-type.
+
+
+
+
+
+Repository last updated: April 19, 2013
 Authors: Steve Awodey, Nicola Gambino, Kristina Sojakova
 Contact : awodey@cmu.edu
           nicola.gambino@gmail.com
