@@ -16,7 +16,7 @@ Definition TwoAlg : Type := { C : Type &  C * C }.
 
 (* Homomorphisms. *)
 Definition TwoHom (X Y : TwoAlg) : Type
-  := { h : X.1 -> Y.1 &
+  := match { h : X.1 -> Y.1 &
      (h (fst X.2) = fst Y.2) * (h (snd X.2) = snd Y.2) }. 
 
 (* Algebra 2-cells. *)
