@@ -94,8 +94,7 @@ transitivity { n : f = g & (f0 = apD10 n c0 @ g0) * (f1 = apD10 n c1 @ g1)}.
   apply equiv_functor_prod'.
     exact (equiv_concat_r ((concat_1p g0)^) f0).
   exact (equiv_concat_r ((concat_1p g1)^) f1).
-apply (equiv_functor_sigma' ((equiv_path_forall _ _)^-1)); intro n.
-by apply equiv_idmap.
+by apply (equiv_functor_sigma' (equiv_apD10 _ _ _)); intro n; by apply equiv_idmap.
 Defined.
 
 Definition bipsecpath2bipsechot {X} {Y : FibBip X} (i j : BipSec Y) (u : i = j) :
@@ -130,7 +129,7 @@ intros; set (U := X); set (V := Y); set (k := i).
 destruct X as [C [c0 c1]], Y as [D [d0 d1]]; destruct i as [f [f0 f1]].
 set (R (x1 x2 y : C) (q : y = x1) (s : y = x2) := { p : _ & q @ p = s}).
 set (S (g : C -> D) x1 x2 y (q : g x2 = y) (s : g x1 = y) := {p : _ & ap g p @ q = s }).
-transitivity { l : D -> C & { n : l o f == idmap & { r : _ & { e : f o r == idmap &
+transitivity {l : D -> C & {n : l o f == idmap & {r : _ & {e : f o r == idmap &
 R _ _ _ (ap l f0) (n c0) * R _ _ _ (ap l f1) (n c1) * S f _ _ _ f0 (e d0) *
 S f _ _ _ f1 (e d1)} } } }.
   set (P := (fun X Y => match X, Y with (A;(a0,a1)), (B;(b0,b1)) => fun j k =>
@@ -158,7 +157,7 @@ S f _ _ _ f1 (e d1)} } } }.
   intros [[[l [l0 l1]] lI] [[r [r0 r1]] rI]].
   rewrite (eissect(equivcompmor U V k (l;(l0,l1)))).
   by rewrite (eissect (equivcompmor V U (r;(r0,r1)) k)); reflexivity.
-transitivity { l : D -> C & { _ : l o f == idmap & { r : _ & { _ : f o r == idmap & Unit} } } }.
+transitivity {l : D -> C & {_ : l o f == idmap & {r : _ & { _ : f o r == idmap & Unit} } } }.
   assert (Rcontr : forall x1 x2 y q s, Contr (R x1 x2 y q s)).
     intros; refine (@contr_equiv' {p : _ & p = q^ @ s} _ _ _).
     by apply equiv_functor_sigma_id; intro p; apply equiv_moveR_Mp.
@@ -185,25 +184,23 @@ Proof. apply (trunc_equiv _ (bipequivEQequiv i)^-1). Qed.
 
 Lemma bippathEQbipequiv `{Univalence} (X Y : Bip) : X = Y <~> BipEquiv X Y.
 Proof.
-transitivity { n : X.1 = Y.1 & transport (fun Z => Z * Z) n X.2 = Y.2}.
-  by apply symmetry; erapply equiv_path_sigma.
-assert (H0 : X = Y <~> { n : X.1 = Y.1 & transport (fun Z => Z * Z) n X.2 = Y.2}).
-  by apply symmetry; erapply equiv_path_sigma.
-assert (H1 : { n : X.1 = Y.1 & transport (fun Z => Z * Z) n X.2 = Y.2} <~> BipEquiv X Y).
-destruct X as [C [c0 c1]], Y as [D [d0 d1]]; cbn.
-transitivity { p : C = D & (equiv_path _ _ p c0 = d0) * (equiv_path _ _ p c1 = d1)}.
-  apply equiv_functor_sigma_id; induction a; apply symmetry.
-  by apply (equiv_path_prod (c0,c1) (d0,d1)).
-transitivity {f : C <~> D & (f c0 = d0) * (f c1 = d1)}.
-  by apply (equiv_functor_sigma' (((equiv_path_universe _ _)^-1))); intro f; apply equiv_idmap.
-transitivity {i : BipMor (C;(c0,c1)) (D;(d0,d1)) & IsEquiv (bipmor2map i) }.
-  refine (equiv_adjointify _ _ _ _).
-    exact (fun x => match x with ((BuildEquiv f fE);fM) => ((f;fM);fE) end).
-    exact (fun x => match x with ((f;fM);fE) => ((BuildEquiv _ _ f fE);fM) end).
-    by intros [[f fM] fE]; reflexivity.
-  by intros [[f fE] fM]; reflexivity.
-by apply equiv_functor_sigma_id; intro i; apply symmetry; apply bipequivEQequiv.
-admit.
+apply equiv_inverse.
+apply @equiv_compose' with (B := {n : _ & transport (fun Z => Z * Z) n X.2 = Y.2}).
+  by erapply equiv_path_sigma.
+destruct X as [C [c0 c1]], Y as [D [d0 d1]].
+apply @equiv_compose' with (B := {p : _ & (equiv_path _ _ p c0 = d0) * (equiv_path _ _ p c1 = d1)}).
+  by apply equiv_functor_sigma_id; induction a; apply (equiv_path_prod (c0,c1) (d0,d1)).
+apply @equiv_compose' with (B := {f : C <~> D & (f c0 = d0) * (f c1 = d1)}).
+  apply symmetry; apply (equiv_functor_sigma' (equiv_equiv_path _ _ )).
+  by intro f; apply equiv_idmap.
+apply equiv_inverse.
+apply @equiv_compose' with (B := {i : BipMor (C;(c0,c1)) (D;(d0,d1)) & IsEquiv (bipmor2map i) }).
+  by apply equiv_functor_sigma_id; intro i; apply symmetry; apply bipequivEQequiv.
+refine (equiv_adjointify _ _ _ _).
+exact (fun x => match x with ((BuildEquiv f fE);fM) => ((f;fM);fE) end).
+exact (fun x => match x with ((f;fM);fE) => ((BuildEquiv _ _ f fE);fM) end).
+  by intros [[f fM] fE]; reflexivity.
+by intros [[f fE] fM]; reflexivity.
 Defined.
 
 Definition bippath2bipequiv (X Y : Bip) (u : X = Y) : BipEquiv X Y :=
@@ -214,10 +211,8 @@ Global Instance isequiv_bippath2bipequiv `{Univalence} (X Y : Bip) : IsEquiv (bi
 Proof.
 apply (isequiv_homotopic (bippathEQbipequiv X Y)); intro u; induction u.
 destruct X as [C [c0 c1]]; erapply path_sigma.
-  admit.
- admit.
-(* exact 1.
-cbn; unfold functor_prod; apply path_prod; cbn; hott_simpl. *)
+  exact 1.
+by rapply equiv_hprop_allpath.
 Qed.
 
 Definition isrec (X : Bip) : Type := forall (Y : Bip), BipMor X Y.
