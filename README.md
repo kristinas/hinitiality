@@ -5,6 +5,8 @@ The repository contains two files:
 
 1) The file "two.v" contains the formalization of the results found in chapters 2 and 3 of the paper ("Bipointed Types" and
 "Homotopy-Initial Bipointed Types").
+
+
 2) The file "w.v" contains the formalization of the results found in chapters 4 and 5 of the paper ("Polynomial Functors and
 Their Algebras" and "Homotopy-Initial Algebras").
 
