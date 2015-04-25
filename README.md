@@ -1,5 +1,5 @@
 This repository contains the Coq formalization of the results in the paper "Homotopy-Initial Algebras in Type Theory" by
-Steve Awodey, Nicola Gambino, and Kristina Sojakova, submitted to the Journal of the ACM on April 24, 2015.
+Steve Awodey, Nicola Gambino, and Kristina Sojakova, available at http://arxiv.org/abs/1504.05531.
 
 The repository contains two files:
 
