@@ -42,6 +42,26 @@ Definition bipcompmor {X Y Z : Bip} : BipMor X Y -> BipMor Y Z -> BipMor X Z :=
     end
   end.
 
+Lemma idmorinvl {X Y : Bip} (i : BipMor X Y) : bipcompmor bipidmor i = i.
+Proof.
+destruct X as [C [c0 c1]], Y as [D [d0 d1]], i as [f [f0 f1]].
+by apply equiv_path_sigma; split with 1; cbn; hott_simpl.
+Qed.
+
+Lemma idmorinvr {X Y : Bip} (i : BipMor X Y) : bipcompmor i bipidmor = i.
+Proof.
+destruct X as [C [c0 c1]], Y as [D [d0 d1]], i as [f [f0 f1]].
+by apply equiv_path_sigma; split with 1; cbn; hott_simpl.
+Qed.
+
+Lemma compmorass {U X Y Z : Bip} (i : BipMor U X) (j : BipMor X Y) (k : BipMor Y Z) :
+  bipcompmor i (bipcompmor j k) = bipcompmor (bipcompmor i j) k.
+Proof.
+destruct U as [C [c0 c1]], X as [D [d0 d1]], Y as [E [e0 e1]]; destruct Z as [M [m0 m1]].
+destruct i as [f [f0 f1]], j as [g [g0 g1]], k as [h [h0 h1]]; apply equiv_path_sigma; split with 1.
+apply equiv_path_prod; cbn; split; rewrite ap_compose; rewrite ap_pp; rewrite concat_p_pp; reflexivity.
+Qed.
+
 Definition isbipequiv {X Y : Bip} (i : BipMor X Y) : Type :=
   {l : BipMor Y X & bipcompmor i l = bipidmor} *
   {r : BipMor Y X & bipcompmor r i = bipidmor}.
@@ -97,7 +117,7 @@ Defined.
 Definition bipsecpath2bipsechot {X} {Y : FibBip X} (i j : BipSec Y) (u : i = j) :
   BipSecHot i j := match u with 1 => bipidsechot end.
 
-(** Lemma 3.10 *)
+(** Lemma 2.8 *)
 Global Instance isequiv_bipsecpath2bipsechot `{Funext} {X} {Y : FibBip X} (i j : BipSec Y) :
   IsEquiv (bipsecpath2bipsechot i j).
 Proof.
@@ -109,7 +129,7 @@ Qed.
 Definition bipmorpath2biphot {X Y : Bip} (i j : BipMor X Y) (u : i = j) : BipHot i j :=
   @bipsecpath2bipsechot X (bip2fibbip Y) i j u.
 
-(** Lemma 3.6 *)
+(** Lemma 2.4 *)
 Global Instance isequiv_bipmorpath2biphot `{Funext} {X Y} (i j : BipMor X Y) :
   IsEquiv (bipmorpath2biphot i j).
 Proof. apply (@isequiv_bipsecpath2bipsechot _ X (bip2fibbip Y) i j). Qed.
@@ -117,7 +137,7 @@ Proof. apply (@isequiv_bipsecpath2bipsechot _ X (bip2fibbip Y) i j). Qed.
 Definition bipmorpathEQbiphot `{Funext} {X Y} (i j : BipMor X Y) : i = j <~> BipHot i j :=
   BuildEquiv _ _ (bipmorpath2biphot i j) _.
 
-(** Proposition 3.4 *)
+(** Lemma 2.10 + Proposition 2.12 *)
 Lemma bipequivEQequiv `{Funext} {X Y : Bip} (i : BipMor X Y) :
   isbipequiv i <~> IsEquiv (bipmor2map i).
 Proof.
@@ -163,8 +183,101 @@ transitivity (BiInv f).
 by apply equiv_biinv_isequiv.
 Qed.
 
+(** Corollary 2.13 *)
 Global Instance isequivprop `{Funext} {X Y : Bip} (i : BipMor X Y) : IsHProp (isbipequiv i).
 Proof. apply (trunc_equiv _ (bipequivEQequiv i)^-1). Qed.
+
+Definition isrec (X : Bip) : Type := forall (Y : Bip), BipMor X Y.
+
+Definition isind (X : Bip) : Type := forall (Y : FibBip X), BipSec Y.
+
+Definition hasetacoh (X : Bip) : Type := forall (Y : Bip) (i j : BipMor X Y), BipHot i j.
+
+Definition hasfibetacoh (X : Bip) : Type := forall (Y : FibBip X) (i j : BipSec Y), BipSecHot i j.
+
+Definition ishinit (X : Bip) : Type := forall (Y : Bip), Contr (BipMor X Y).
+
+Definition BipInd : Type := {X : Bip & isind X}.
+
+(** Proposition 3.7 *)
+Proposition hinitbipuniqueeq `{Funext} {X Y : Bip} : ishinit X -> ishinit Y -> Contr (BipEquiv X Y).
+Proof.
+intros hX hY; apply (@trunc_sigma _ _ _ (hX Y)); intro i; refine (contr_inhabited_hprop _ _).
+split; split with (fst (equiv_contr_inhabited_allpath (hY X))).
+  by apply (snd (equiv_contr_inhabited_allpath (hX X))).
+by apply (snd (equiv_contr_inhabited_allpath (hY Y))).
+Qed.
+
+(** Proposition 3.3 *)
+Proposition isind2hasfibetacoh (X : Bip) : isind X -> hasfibetacoh X.
+Proof.
+destruct X as [C [c0 c1]]; intros Cind [E [e0 e1]] [f [f0 f1]] [g [g0 g1]].
+assert (Hij := Cind (fun x => f x = g x; (f0 @ g0^,f1 @ g1^))).
+exact (Hij.1; ((moveR_pM _ _ _ (fst Hij.2))^, (moveR_pM _ _ _ (snd Hij.2))^)).
+Qed.
+
+Let fixedYprop `{Funext} X (Y : FibBip X) : IsHProp (forall (i j : BipSec Y), BipSecHot i j).
+Proof.
+apply (trunc_equiv' (forall (i j : BipSec Y), i = j)).
+  exact (equiv_functor_forall_id (fun i => equiv_functor_forall_id (fun j => bipsecpathEQbipsechot i j))).
+apply hprop_allpath; intros ec1 ec2; apply path_forall; intro i; apply path_forall; intro j.
+apply (@path2_contr _ (equiv_contr_inhabited_allpath^-1 (i,ec1))).
+Qed.
+
+Global Instance hasfibetacohprop `{Funext} (X : Bip) : IsHProp (hasfibetacoh X).
+Proof. apply (@trunc_forall _); intro Y; apply fixedYprop. Qed.
+ 
+Global Instance hasetacohprop `{Funext} (X : Bip) : IsHProp (hasetacoh X).
+Proof. apply (@trunc_forall _); intro Y; apply (fixedYprop _ (bip2fibbip Y)). Qed.
+
+(** Proposition 3.4 *)
+Global Instance isindprop `{Funext} (X : Bip) : IsHProp (isind X).
+Proof.
+apply hprop_allpath; intros iX iX'; apply path_forall; intro Y.
+by apply (bipsecpath2bipsechot _ _)^-1; apply (isind2hasfibetacoh _ iX).
+Qed.
+
+(** Proposition 3.8 *)
+Proposition ishinitEQisrechasetacoh `{Funext} (X : Bip) : isrec X * hasetacoh X <~> ishinit X.
+Proof.
+transitivity (forall Y, BipMor X Y * forall (i j : BipMor X Y), BipHot i j).
+  by apply equiv_prod_coind.
+apply (equiv_functor_forall_id); intro Y; apply symmetry.
+transitivity (BipMor X Y * forall (i j : BipMor X Y), i = j).
+  by apply equiv_contr_inhabited_allpath.
+apply equiv_functor_prod_l; apply equiv_functor_forall_id; intro i.
+by apply equiv_functor_forall_id; intro j; apply bipmorpathEQbiphot.
+Qed.
+
+(** Theorem 3.10 and Corollary 3.11 *)
+Theorem isindEQishinit `{Funext} (X : Bip) : isind X <~> ishinit X.
+Proof.
+apply equiv_iff_hprop.
+  intro iX; apply ishinitEQisrechasetacoh.
+  exact (fun Y => iX (bip2fibbip Y), fun Y => isind2hasfibetacoh _ iX (bip2fibbip Y)).
+destruct X as [C [c0 c1]]; intros hX; apply ishinitEQisrechasetacoh in hX; destruct hX as [rC ecC].
+intro Y; destruct (rC (fibbip2bip Y)) as [f [f0 f1]]; destruct Y as [E [e0 e1]].
+destruct (ecC (C;(c0,c1)) (pr1 o f; (f0..1, f1..1)) bipidmor) as [n [n0 n1]].
+split with (fun x => n x # (f x).2); rewrite (concat_p1 (n c0))^; rewrite (concat_p1 (n c1))^.
+by rewrite n0^; rewrite n1^; rewrite f0..2; rewrite f1..2; exact (1,1).
+Qed.
+
+Lemma boolhinit : isind (Bool;(true,false)).
+Proof. intros [E [e0 e1]]; split with (Bool_ind E e0 e1); split; reflexivity. Qed.
+
+(** Corollary 3.12 *)
+Corollary ishinitEQeq2hinit `{Funext} {X Y : Bip} : ishinit Y -> ishinit X <~> BipEquiv X Y.
+Proof.
+intro hY; assert (eqXY2hX : BipEquiv X Y -> ishinit X).
+  intros [f [[r rI] [l lI]]] Z; refine (@contr_equiv' _ _ _ (hY Z)).
+  apply (BuildEquiv _ _ (fun i => bipcompmor f i)); apply isequiv_biinv; split.
+    split with (fun i => bipcompmor l i); intro i; rewrite compmorass; rewrite lI; rewrite idmorinvl.
+    by reflexivity.
+  split with (fun i => bipcompmor r i); intro i; rewrite compmorass; rewrite rI; rewrite idmorinvl.
+  by reflexivity.
+refine (@equiv_iff_hprop _ _ _ _ (fun hX => center _ (hinitbipuniqueeq hX hY)) eqXY2hX).
+by apply equiv_hprop_inhabited_contr^-1; intro eqXY; exact (hinitbipuniqueeq (eqXY2hX eqXY) hY).
+Qed.
 
 Lemma bippathEQbipequiv `{Univalence} (X Y : Bip) : X = Y <~> BipEquiv X Y.
 Proof.
@@ -188,95 +301,17 @@ Defined.
 Definition bippath2bipequiv (X Y : Bip) (u : X = Y) : BipEquiv X Y :=
   match u with 1 => bipidequiv end.
 
-(** Theorem 4.8 *)
+(** Theorem 3.14 *)
 Global Instance isequiv_bippath2bipequiv `{Univalence} (X Y : Bip) : IsEquiv (bippath2bipequiv X Y).
 Proof.
 apply (isequiv_homotopic (bippathEQbipequiv X Y)); intro u; induction u.
 by destruct X as [C [c0 c1]]; erapply path_sigma_uncurried; split with 1; rapply equiv_hprop_allpath.
 Qed.
 
-Definition isrec (X : Bip) : Type := forall (Y : Bip), BipMor X Y.
-
-Definition isind (X : Bip) : Type := forall (Y : FibBip X), BipSec Y.
-
-Definition hasetacoh (X : Bip) : Type := forall (Y : Bip) (i j : BipMor X Y), BipHot i j.
-
-Definition hasfibetacoh (X : Bip) : Type := forall (Y : FibBip X) (i j : BipSec Y), BipSecHot i j.
-
-Definition ishinit (X : Bip) : Type := forall (Y : Bip), Contr (BipMor X Y).
-
-Definition BipInd : Type := {X : Bip & isind X}.
-
-(** Proposition 4.3 *)
-Lemma isind2hasfibetacoh (X : Bip) : isind X -> hasfibetacoh X.
-Proof.
-destruct X as [C [c0 c1]]; intros Cind [E [e0 e1]] [f [f0 f1]] [g [g0 g1]].
-assert (Hij := Cind (fun x => f x = g x; (f0 @ g0^,f1 @ g1^))).
-exact (Hij.1; ((moveR_pM _ _ _ (fst Hij.2))^, (moveR_pM _ _ _ (snd Hij.2))^)).
-Qed.
-
-Let fixedYprop `{Funext} X (Y : FibBip X) : IsHProp (forall (i j : BipSec Y), BipSecHot i j).
-Proof.
-apply (trunc_equiv' (forall (i j : BipSec Y), i = j)).
-  exact (equiv_functor_forall_id (fun i => equiv_functor_forall_id (fun j => bipsecpathEQbipsechot i j))).
-apply hprop_allpath; intros ec1 ec2; apply path_forall; intro i; apply path_forall; intro j.
-apply (@path2_contr _ (equiv_contr_inhabited_allpath^-1 (i,ec1))).
-Qed.
-
-Global Instance hasfibetacohprop `{Funext} (X : Bip) : IsHProp (hasfibetacoh X).
-Proof. apply (@trunc_forall _); intro Y; apply fixedYprop. Qed.
- 
-Global Instance hasetacohprop `{Funext} (X : Bip) : IsHProp (hasetacoh X).
-Proof. apply (@trunc_forall _); intro Y; apply (fixedYprop _ (bip2fibbip Y)). Qed.
-
-Global Instance isindprop `{Funext} (X : Bip) : IsHProp (isind X).
-Proof.
-apply hprop_allpath; intros iX iX'; apply path_forall; intro Y.
-by apply (bipsecpath2bipsechot _ _)^-1; apply (isind2hasfibetacoh _ iX).
-Qed.
-
-(** Proposition 4.5 *)
-Lemma ishinitEQisrechasetacoh `{Funext} (X : Bip) : isrec X * hasetacoh X <~> ishinit X.
-Proof.
-transitivity (forall Y, BipMor X Y * forall (i j : BipMor X Y), BipHot i j).
-  by apply equiv_prod_coind.
-apply (equiv_functor_forall_id); intro Y; apply symmetry.
-transitivity (BipMor X Y * forall (i j : BipMor X Y), i = j).
-  by apply equiv_contr_inhabited_allpath.
-apply equiv_functor_prod_l; apply equiv_functor_forall_id; intro i.
-by apply equiv_functor_forall_id; intro j; apply bipmorpathEQbiphot.
-Qed.
-
-(** Theorem 4.6 *)
-Theorem isindEQishinit `{Funext} (X : Bip) : isind X <~> ishinit X.
-Proof.
-apply equiv_iff_hprop.
-  intro iX; apply ishinitEQisrechasetacoh.
-  exact (fun Y => iX (bip2fibbip Y), fun Y => isind2hasfibetacoh _ iX (bip2fibbip Y)).
-destruct X as [C [c0 c1]]; intros hX; apply ishinitEQisrechasetacoh in hX; destruct hX as [rC ecC].
-intro Y; destruct (rC (fibbip2bip Y)) as [f [f0 f1]]; destruct Y as [E [e0 e1]].
-destruct (ecC (C;(c0,c1)) (pr1 o f; (f0..1, f1..1)) bipidmor) as [n [n0 n1]].
-split with (fun x => n x # (f x).2); rewrite (concat_p1 (n c0))^; rewrite (concat_p1 (n c1))^.
-by rewrite n0^; rewrite n1^; rewrite f0..2; rewrite f1..2; exact (1,1).
-Qed.
-
-(** Corollary 4.9 *)
+(** Corollary 3.15 *)
 Corollary hinitbipunique `{Univalence} {X Y : Bip} : ishinit X -> ishinit Y -> Contr (X = Y).
 Proof.
-intros hX hY; refine (contr_equiv _ (bippathEQbipequiv X Y)^-1).
-apply (@trunc_sigma _ _ _ (hX Y)); intro i; refine (contr_inhabited_hprop _ _).
-split; split with (fst (equiv_contr_inhabited_allpath (hY X))).
-  by apply (snd (equiv_contr_inhabited_allpath (hX X))).
-by apply (snd (equiv_contr_inhabited_allpath (hY Y))).
-Qed.
-
-(** Corollary 4.7 *)
-Corollary ishinitEQeqtohinit `{Univalence} {X Y : Bip} : ishinit X -> ishinit Y <~> X = Y.
-Proof.
-intro hX; refine (equiv_iff_hprop _ _).
-  by apply equiv_hprop_inhabited_contr^-1; path_induction; apply (hinitbipunique hX hX).
-  by apply (hinitbipunique hX).
-by path_induction; exact hX.
+by intros hX hY; refine (contr_equiv _ (bippathEQbipequiv X Y)^-1); apply (hinitbipuniqueeq hX hY).
 Qed.
 
 Global Instance bipindprop `{Univalence} : IsHProp BipInd.

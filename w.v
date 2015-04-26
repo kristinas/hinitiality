@@ -41,6 +41,26 @@ destruct X as [C c]; destruct Y as [D d]; destruct Z as [E e]; intros [f f0] [g 
 split with (g o f); exact (fun a t => ap g (f0 a t) @ g0 a (f o t)).
 Defined.
 
+Lemma idmorinvl `{Funext} {A B} {X Y : Alg A B} (i : AlgMor X Y) : algcompmor algidmor i = i.
+Proof.
+destruct X as [C c], Y as [D d], i as [f f0]; apply equiv_path_sigma; split with 1.
+by apply path_forall; intro a; apply path_forall; intro t; cbn; hott_simpl.
+Qed.
+
+Lemma idmorinvr `{Funext} {A B} {X Y : Alg A B} (i : AlgMor X Y) : algcompmor i algidmor = i.
+Proof.
+destruct X as [C c], Y as [D d], i as [f f0]; apply equiv_path_sigma; split with 1.
+by apply path_forall; intro a; apply path_forall; intro t; cbn; hott_simpl.
+Qed.
+
+Lemma compmorass `{Funext} {A B} {U X Y Z : Alg A B} (i : AlgMor U X) (j : AlgMor X Y) (k : AlgMor Y Z) :
+  algcompmor i (algcompmor j k) = algcompmor (algcompmor i j) k.
+Proof.
+destruct U as [C c], X as [D d], Y as [E e], Z as [M m], i as [f f0], j as [g g0], k as [h h0].
+apply equiv_path_sigma; split with 1; apply path_forall; intro a; apply path_forall; intro t; cbn.
+by rewrite ap_compose; rewrite ap_pp; rewrite concat_p_pp; reflexivity.
+Qed.
+
 Definition isalgequiv {A B} {X Y : Alg A B} (i : AlgMor X Y) : Type :=
   {l : AlgMor Y X & algcompmor i l = algidmor} *
   {r : AlgMor Y X & algcompmor r i = algidmor}.
@@ -103,7 +123,7 @@ Defined.
 Definition algsecpath2algsechot `{Funext} {A B} {X : Alg A B} {Y : FibAlg X} (i j : AlgSec Y)
   (u : i = j) : AlgSecHot i j := match u with 1 => algidsechot end.
 
-(** Lemma 5.10 *)
+(** Lemma 5.8 *)
 Global Instance isequiv_algsecpath2algsechot `{Funext} {A B} {X : Alg A B} {Y : FibAlg X}
   (i j : AlgSec Y) : IsEquiv (algsecpath2algsechot i j).
 Proof.
@@ -115,7 +135,7 @@ Qed.
 Definition algmorpath2alghot `{Funext} {A B} {X Y : Alg A B} (i j : AlgMor X Y) (u : i = j) :
   AlgHot i j := @algsecpath2algsechot _ _ _ X (alg2fibalg Y) i j u.
 
-(** Lemma 5.6 *)
+(** Lemma 4.4 *)
 Global Instance isequiv_algmorpath2alghot `{Funext} {A B} {X Y : Alg A B} (i j : AlgMor X Y) :
   IsEquiv (algmorpath2alghot i j).
 Proof. apply (@isequiv_algsecpath2algsechot _ _ _ X (alg2fibalg Y) i j). Qed.
@@ -123,7 +143,7 @@ Proof. apply (@isequiv_algsecpath2algsechot _ _ _ X (alg2fibalg Y) i j). Qed.
 Definition algmorpathEQalghot `{Funext} {A B} {X Y : Alg A B} (i j : AlgMor X Y) :
   i = j <~> AlgHot i j := BuildEquiv _ _ (algmorpath2alghot i j) _.
 
-(** Proposition 3.4 *)
+(** Lemma 4.10 + Proposition 4.11 *)
 Lemma algequivEQequiv `{Funext} {A B} {X Y : Alg A B} (i : AlgMor X Y) :
   isalgequiv i <~> IsEquiv (algmor2map i).
 Proof.
@@ -187,8 +207,123 @@ transitivity (BiInv f).
 by apply equiv_biinv_isequiv.
 Qed.
 
+(** Corollary 4.12 *)
 Global Instance isequivprop `{Funext} {A B} {X Y : Alg A B} (i : AlgMor X Y) : IsHProp (isalgequiv i).
 Proof. apply (trunc_equiv _ (algequivEQequiv i)^-1). Qed.
+
+Definition isrec {A B} (X : Alg A B) : Type := forall (Y : Alg A B), AlgMor X Y.
+
+Definition isind {A B} (X : Alg A B) : Type := forall (Y : FibAlg X), AlgSec Y.
+
+Definition hasetacoh `{Funext} {A B} (X : Alg A B) : Type :=
+  forall (Y : Alg A B) (i j : AlgMor X Y), AlgHot i j.
+
+Definition hasfibetacoh `{Funext} {A B} (X : Alg A B) : Type :=
+  forall (Y : FibAlg X) (i j : AlgSec Y), AlgSecHot i j.
+
+Definition ishinit {A B} (X : Alg A B) : Type := forall (Y : Alg A B), Contr (AlgMor X Y).
+
+Definition AlgInd A B : Type := {X : Alg A B & isind X}.
+
+(** Proposition 5.2 *)
+Proposition hinitalguniqueeq `{Funext} {A B} {X Y : Alg A B} :
+  ishinit X -> ishinit Y -> Contr (AlgEquiv X Y).
+Proof.
+intros hX hY; apply (@trunc_sigma _ _ _ (hX Y)); intro i; refine (contr_inhabited_hprop _ _).
+split; split with (fst (equiv_contr_inhabited_allpath (hY X))).
+  by apply (snd (equiv_contr_inhabited_allpath (hX X))).
+by apply (snd (equiv_contr_inhabited_allpath (hY Y))).
+Qed.
+
+(** Proposition 5.4 *)
+Proposition isind2hasfibetacoh `{Funext} {A B} (X : Alg A B) : isind X -> hasfibetacoh X.
+Proof.
+destruct X as [C c]; intros Ci [E e] [f f0] [g g0].
+assert (Hi := Ci (existT (fun E => forall a t, (forall b, E (t b)) -> E (c a t)) (fun x => f x = g x)
+  (fun a t s => f0 a t @ ap (e a t) (path_forall _ _ s) @ (g0 a t)^))).
+split with Hi.1; intros a t; rewrite (Hi.2 a t); rewrite concat_pV_p; reflexivity.
+Defined.
+
+Let fixedYprop `{Funext} {A B} (X : Alg A B) (Y : FibAlg X) :
+  IsHProp (forall (i j : AlgSec Y), AlgSecHot i j).
+Proof.
+apply (trunc_equiv' (forall (i j : AlgSec Y), i = j)).
+  exact (equiv_functor_forall_id (fun i => equiv_functor_forall_id (fun j => algsecpathEQalgsechot i j))).
+apply hprop_allpath; intros ec1 ec2; apply path_forall; intro i; apply path_forall; intro j.
+apply (@path2_contr _ (equiv_contr_inhabited_allpath^-1 (i,ec1))).
+Qed.
+
+Global Instance hasfibetacohprop `{Funext} {A B} (X : Alg A B) : IsHProp (hasfibetacoh X).
+Proof. apply (@trunc_forall _); intro Y; apply fixedYprop. Qed.
+ 
+Global Instance hasetacohprop `{Funext} {A B} (X : Alg A B) : IsHProp (hasetacoh X).
+Proof. apply (@trunc_forall _); intro Y; apply (fixedYprop _ (alg2fibalg Y)). Qed.
+
+(** Proposition 5.5 *)
+Global Instance isindprop `{Funext} {A B} (X : Alg A B) : IsHProp (isind X).
+Proof.
+apply hprop_allpath; intros iX iX'; apply path_forall; intro Y.
+by apply (algsecpath2algsechot _ _)^-1; apply (isind2hasfibetacoh _ iX).
+Qed.
+
+(** Lemma 5.7 *)
+Lemma lambek `{Funext} {A B} (X : Alg A B) : ishinit X ->
+  IsEquiv (fun x : {a : A & B a -> X.1} => X.2 x.1 x.2).
+Proof.
+intro hX; assert (iX := snd (equiv_contr_inhabited_allpath (hX X))); destruct X as [C c].
+set (cc := fun x : {a : _ & B a -> C} => c x.1 x.2).
+set (Y := existT (fun C => forall a, (B a -> C) -> C) {a : A & B a -> C} (fun a s => (a;cc o s))).
+set (k := fst (equiv_contr_inhabited_allpath (hX Y))); set (i := k); destruct k as [f fH].
+set (j := existT (fun f => forall a s, f (a;cc o s) = c a (f o s)) cc (fun a s => 1) : AlgMor Y (C;c)).
+set (fccI := apD10 (iX (algcompmor i j) algidmor)..1); refine (isequiv_adjointify _ f fccI _).
+by intros [a t]; rewrite (fH a t); apply path_sigma' with (p := 1); apply path_forall; intro b; apply fccI.
+Qed.
+
+(** Proposition 5.8 *)
+Lemma ishinitEQisrechasetacoh `{Funext} {A B} (X : Alg A B) : isrec X * hasetacoh X <~> ishinit X.
+Proof.
+transitivity (forall Y, AlgMor X Y * forall (i j : AlgMor X Y), AlgHot i j).
+  by apply equiv_prod_coind.
+apply (equiv_functor_forall_id); intro Y; apply symmetry.
+transitivity (AlgMor X Y * forall (i j : AlgMor X Y), i = j).
+  by apply equiv_contr_inhabited_allpath.
+apply equiv_functor_prod_l; apply equiv_functor_forall_id; intro i.
+by apply equiv_functor_forall_id; intro j; apply algmorpathEQalghot.
+Qed.
+
+(** Theorem 5.10 and Corollary 5.11 *)
+Theorem isindEQishinit `{Funext} {A B} (X : Alg A B) : isind X <~> ishinit X.
+Proof.
+apply equiv_iff_hprop.
+  intro iX; apply ishinitEQisrechasetacoh.
+  exact (fun Y => iX (alg2fibalg Y), fun Y => isind2hasfibetacoh _ iX (alg2fibalg Y)).
+destruct X as [C c]; intros hX; apply ishinitEQisrechasetacoh in hX; destruct hX as [rC ecC].
+intro Y; destruct (rC (fibalg2alg Y)) as [f f0]; destruct Y as [E e].
+destruct (ecC (C;c) (existT (fun h => forall a t, h (c a t) = c a (h o t)) (fun x => (f x).1)
+  (fun a t => (f0 a t)..1)) algidmor) as [n n0].
+split with (fun x => n x # (f x).2); intros a t; rewrite (concat_p1 (n (c a t)))^; rewrite ((n0 a t)^).
+rewrite transport_pp; rewrite (f0 a t)..2; unfold composeD; cbn.
+set (q := path_forall _ _ (fun b => n (t b))); transitivity (e a t (fun b => apD10 q b # (f (t b)).2)).
+  by induction q; reflexivity.
+apply ap; apply path_forall; intro b; unfold q; rewrite apD10_path_forall; reflexivity.
+Qed.
+
+Lemma whinit {A B} : isind (W A B;sup A B).
+Proof. intros [E e]; split with (W_ind A B E e); reflexivity. Qed.
+
+(** Corollary 5.12 *)
+Corollary ishinitEQeq2hinit `{Funext} {A B} {X Y : Alg A B} : ishinit Y -> ishinit X <~> AlgEquiv X Y.
+Proof.
+intro hY; assert (eqXY2hX : AlgEquiv X Y -> ishinit X).
+  intros [f [[r rI] [l lI]]] Z; refine (@contr_equiv' _ _ _ (hY Z)).
+  apply (BuildEquiv _ _ (fun i => algcompmor f i)); apply isequiv_biinv; split.
+    split with (fun i => algcompmor l i); intro i; rewrite compmorass; rewrite lI; rewrite idmorinvl.
+    by reflexivity.
+  split with (fun i => algcompmor r i); intro i; rewrite compmorass; rewrite rI; rewrite idmorinvl.
+  by reflexivity.
+refine (@equiv_iff_hprop _ _ _ _ (fun hX => center _ (hinitalguniqueeq hX hY)) eqXY2hX).
+by apply equiv_hprop_inhabited_contr^-1; intro eqXY; exact (hinitalguniqueeq (eqXY2hX eqXY) hY).
+Qed.
 
 Lemma algpathEQalgequiv `{Univalence} {A B} (X Y : Alg A B) : X = Y <~> AlgEquiv X Y.
 Proof.
@@ -214,7 +349,7 @@ Defined.
 Definition algpath2algequiv {A B} (X Y : Alg A B) (u : X = Y) : AlgEquiv X Y :=
   match u with 1 => algidequiv end.
 
-(** Theorem 6.11 *)
+(** Theorem 5.15 *)
 Global Instance isequiv_algpath2algequiv `{Univalence} {A B} (X Y : Alg A B) :
   IsEquiv (algpath2algequiv X Y).
 Proof.
@@ -222,109 +357,10 @@ apply (isequiv_homotopic (algpathEQalgequiv X Y)); intro u; induction u.
 by destruct X as [C c]; erapply path_sigma_uncurried; split with 1; rapply equiv_hprop_allpath.
 Qed.
 
-Definition isrec {A B} (X : Alg A B) : Type := forall (Y : Alg A B), AlgMor X Y.
-
-Definition isind {A B} (X : Alg A B) : Type := forall (Y : FibAlg X), AlgSec Y.
-
-Definition hasetacoh `{Funext} {A B} (X : Alg A B) : Type :=
-  forall (Y : Alg A B) (i j : AlgMor X Y), AlgHot i j.
-
-Definition hasfibetacoh `{Funext} {A B} (X : Alg A B) : Type :=
-  forall (Y : FibAlg X) (i j : AlgSec Y), AlgSecHot i j.
-
-Definition ishinit {A B} (X : Alg A B) : Type := forall (Y : Alg A B), Contr (AlgMor X Y).
-
-Definition AlgInd A B : Type := {X : Alg A B & isind X}.
-
-(** Proposition 6.3 *)
-Lemma isind2hasfibetacoh `{Funext} {A B} (X : Alg A B) : isind X -> hasfibetacoh X.
-Proof.
-destruct X as [C c]; intros Ci [E e] [f f0] [g g0].
-assert (Hi := Ci (existT (fun E => forall a t, (forall b, E (t b)) -> E (c a t)) (fun x => f x = g x)
-  (fun a t s => f0 a t @ ap (e a t) (path_forall _ _ s) @ (g0 a t)^))).
-split with Hi.1; intros a t; rewrite (Hi.2 a t); rewrite concat_pV_p; reflexivity.
-Defined.
-
-Let fixedYprop `{Funext} {A B} (X : Alg A B) (Y : FibAlg X) :
-  IsHProp (forall (i j : AlgSec Y), AlgSecHot i j).
-Proof.
-apply (trunc_equiv' (forall (i j : AlgSec Y), i = j)).
-  exact (equiv_functor_forall_id (fun i => equiv_functor_forall_id (fun j => algsecpathEQalgsechot i j))).
-apply hprop_allpath; intros ec1 ec2; apply path_forall; intro i; apply path_forall; intro j.
-apply (@path2_contr _ (equiv_contr_inhabited_allpath^-1 (i,ec1))).
-Qed.
-
-Global Instance hasfibetacohprop `{Funext} {A B} (X : Alg A B) : IsHProp (hasfibetacoh X).
-Proof. apply (@trunc_forall _); intro Y; apply fixedYprop. Qed.
- 
-Global Instance hasetacohprop `{Funext} {A B} (X : Alg A B) : IsHProp (hasetacoh X).
-Proof. apply (@trunc_forall _); intro Y; apply (fixedYprop _ (alg2fibalg Y)). Qed.
-
-Global Instance isindprop `{Funext} {A B} (X : Alg A B) : IsHProp (isind X).
-Proof.
-apply hprop_allpath; intros iX iX'; apply path_forall; intro Y.
-by apply (algsecpath2algsechot _ _)^-1; apply (isind2hasfibetacoh _ iX).
-Qed.
-
-(** Proposition 6.5 *)
-Lemma lambek `{Funext} {A B} (X : Alg A B) : ishinit X ->
-  IsEquiv (fun x : {a : A & B a -> X.1} => X.2 x.1 x.2).
-Proof.
-intro hX; assert (iX := snd (equiv_contr_inhabited_allpath (hX X))); destruct X as [C c].
-set (cc := fun x : {a : _ & B a -> C} => c x.1 x.2).
-set (Y := existT (fun C => forall a, (B a -> C) -> C) {a : A & B a -> C} (fun a s => (a;cc o s))).
-set (k := fst (equiv_contr_inhabited_allpath (hX Y))); set (i := k); destruct k as [f fH].
-set (j := existT (fun f => forall a s, f (a;cc o s) = c a (f o s)) cc (fun a s => 1) : AlgMor Y (C;c)).
-set (fccI := apD10 (iX (algcompmor i j) algidmor)..1); refine (isequiv_adjointify _ f fccI _).
-by intros [a t]; rewrite (fH a t); apply path_sigma' with (p := 1); apply path_forall; intro b; apply fccI.
-Qed.
-
-(** Proposition 6.6 *)
-Lemma ishinitEQisrechasetacoh `{Funext} {A B} (X : Alg A B) : isrec X * hasetacoh X <~> ishinit X.
-Proof.
-transitivity (forall Y, AlgMor X Y * forall (i j : AlgMor X Y), AlgHot i j).
-  by apply equiv_prod_coind.
-apply (equiv_functor_forall_id); intro Y; apply symmetry.
-transitivity (AlgMor X Y * forall (i j : AlgMor X Y), i = j).
-  by apply equiv_contr_inhabited_allpath.
-apply equiv_functor_prod_l; apply equiv_functor_forall_id; intro i.
-by apply equiv_functor_forall_id; intro j; apply algmorpathEQalghot.
-Qed.
-
-(** Theorem 6.7 *)
-Theorem isindEQishinit `{Funext} {A B} (X : Alg A B) : isind X <~> ishinit X.
-Proof.
-apply equiv_iff_hprop.
-  intro iX; apply ishinitEQisrechasetacoh.
-  exact (fun Y => iX (alg2fibalg Y), fun Y => isind2hasfibetacoh _ iX (alg2fibalg Y)).
-destruct X as [C c]; intros hX; apply ishinitEQisrechasetacoh in hX; destruct hX as [rC ecC].
-intro Y; destruct (rC (fibalg2alg Y)) as [f f0]; destruct Y as [E e].
-destruct (ecC (C;c) (existT (fun h => forall a t, h (c a t) = c a (h o t)) (fun x => (f x).1)
-  (fun a t => (f0 a t)..1)) algidmor) as [n n0].
-split with (fun x => n x # (f x).2); intros a t; rewrite (concat_p1 (n (c a t)))^; rewrite ((n0 a t)^).
-rewrite transport_pp; rewrite (f0 a t)..2; unfold composeD; cbn.
-set (q := path_forall _ _ (fun b => n (t b))); transitivity (e a t (fun b => apD10 q b # (f (t b)).2)).
-  by induction q; reflexivity.
-apply ap; apply path_forall; intro b; unfold q; rewrite apD10_path_forall; reflexivity.
-Qed.
-
-(** Corollary 6.12 *)
+(** Corollary 5.16 *)
 Corollary hinitalgunique `{Univalence} {A B} {X Y : Alg A B} : ishinit X -> ishinit Y -> Contr (X = Y).
 Proof.
-intros hX hY; refine (contr_equiv _ (algpathEQalgequiv X Y)^-1).
-apply (@trunc_sigma _ _ _ (hX Y)); intro i; refine (contr_inhabited_hprop _ _).
-split; split with (fst (equiv_contr_inhabited_allpath (hY X))).
-  by apply (snd (equiv_contr_inhabited_allpath (hX X))).
-by apply (snd (equiv_contr_inhabited_allpath (hY Y))).
-Qed.
-
-(** Corollary 6.8 *)
-Corollary ishinitEQeqtohinit `{Univalence} {A B} {X Y : Alg A B} : ishinit X -> ishinit Y <~> X = Y.
-Proof.
-intro hX; refine (equiv_iff_hprop _ _).
-  by apply equiv_hprop_inhabited_contr^-1; path_induction; apply (hinitalgunique hX hX).
-  by apply (hinitalgunique hX).
-by path_induction; exact hX.
+intros hX hY; refine (contr_equiv _ (algpathEQalgequiv X Y)^-1); apply (hinitalguniqueeq hX hY).
 Qed.
 
 Global Instance algindprop `{Univalence} {A B} : IsHProp (@AlgInd A B).
